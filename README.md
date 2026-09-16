@@ -3,7 +3,7 @@
 レースで決める、白熱のオンライン抽選ツール。
 Zoomなどの定例会議・ウェビナーで主催者が画面共有しながら使う想定です。
 
-**公開URL**: https://adcwkaz.github.io/live-race/
+**公開URL**: <a href="https://kk-vc.github.io/live-race/" target="_blank" rel="noopener noreferrer">https://kk-vc.github.io/live-race/</a>
 
 ## 使い方
 
@@ -24,7 +24,7 @@ Zoomなどの定例会議・ウェビナーで主催者が画面共有しなが�
 
 | テーマ | 演出 |
 |---|---|
-| 🏇 競馬 | 横スクロールレース |
+| 🏇 競馬 | カーブ付きオーバルコース(斜め俯瞰) |
 | 🏎️ カーレース | 横スクロールレース |
 | 🦆 アヒルボート | 横スクロールレース |
 | 🏃 マラソン | 横スクロールレース |
@@ -56,4 +56,4 @@ node e2e/golf-and-crowd.mjs  # ゴルフ+100名ケースの確認
 mainブランチへのpushでGitHub Actionsが自動的にGitHub Pagesへデプロイします
 (リポジトリ設定 → Pages → Source を「GitHub Actions」にしておくこと)。
 
-設計・要件の詳細は [REQUIREMENTS.md](REQUIREMENTS.md) を参照。
+設計・要件の詳細は <a href="REQUIREMENTS.md" target="_blank" rel="noopener noreferrer">REQUIREMENTS.md</a> を参照。
