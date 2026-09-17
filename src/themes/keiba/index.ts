@@ -247,7 +247,12 @@ class KeibaOvalRace {
 
     this.drawCourse(g, 0);
 
-    const laneStep = (BAND_HALF * 2) / n;
+    const laneStep = (BAND_HALF * 2) / n; // スプライトの大きさ基準(従来通り)
+
+    // 内側(+側)へ寄せて詰めた基準位置。全員がなるべくインコースを走ろうとする形にする
+    const innerEdge = BAND_HALF - 4;
+    const outerEdge = -BAND_HALF * 0.1;
+    const packStep = (innerEdge - outerEdge) / n;
 
     // 奥(小さいY)から手前(大きいY)へ描画して奥行きを表現
     const order = this.c.names
@@ -256,9 +261,9 @@ class KeibaOvalRace {
 
     for (const i of order) {
       const p = trackPointAt(this.progress(i) * TRACK_LEN);
-      const baseOffset = -BAND_HALF + laneStep * i + laneStep / 2;
+      const baseOffset = outerEdge + packStep * i + packStep / 2;
       const sw = this.sway[i];
-      const sway = Math.sin(this.raceClock * sw.omega + sw.phase) * sw.amp * laneStep;
+      const sway = Math.sin(this.raceClock * sw.omega + sw.phase) * sw.amp * packStep;
       const offset = Math.max(-BAND_HALF + 2, Math.min(BAND_HALF - 2, baseOffset + sway));
       const x = p.x + p.nx * offset;
       const y = p.y + p.ny * offset;
