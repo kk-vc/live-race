@@ -221,15 +221,24 @@ class KeibaOvalRace {
   private drawWorld(g: CanvasRenderingContext2D): void {
     const n = this.c.names.length;
 
-    // 先頭の位置を常に画面中心付近に据えるカメラ(進行方向に応じて見せ幅を前方寄りにする)
+    // 先頭の位置を画面中心付近に据えるカメラ(進行方向に応じて見せ幅を前方寄りにする)。
+    // ZOOMを上げるほど寄りの画になる。ズームに合わせて縦方向も先頭を追う
+    const ZOOM = 1.55;
     let leaderS = 0;
     for (let i = 0; i < n; i++) leaderS = Math.max(leaderS, this.progress(i) * TRACK_LEN);
     const lp = trackPointAt(leaderS);
-    const forwardBias = Math.cos(lp.heading) * VW * 0.12;
-    const camX = lp.x - VW * 0.5 + forwardBias;
+    const bias = 170; // ワールド単位での前方バイアス
+    const camCX = lp.x + Math.cos(lp.heading) * bias;
+    const camCY = lp.y;
 
-    this.drawScenery(g, camX);
-    this.drawCourse(g, camX);
+    this.drawScenery(g, camCX);
+
+    g.save();
+    g.translate(VW / 2, VH / 2);
+    g.scale(ZOOM, ZOOM);
+    g.translate(-camCX, -camCY);
+
+    this.drawCourse(g, 0);
 
     const laneStep = (BAND_HALF * 2) / n;
 
@@ -241,9 +250,8 @@ class KeibaOvalRace {
     for (const i of order) {
       const p = trackPointAt(this.progress(i) * TRACK_LEN);
       const offset = -BAND_HALF + laneStep * i + laneStep / 2;
-      const x = p.x - camX + p.nx * offset;
+      const x = p.x + p.nx * offset;
       const y = p.y + p.ny * offset;
-      if (x < -120 || x > VW + 120) continue;
 
       const depth = (p.y - BACK_Y) / (HOME_Y - BACK_Y); // 0(奥)〜1(手前)
       const depthScale = 0.82 + depth * 0.36;
@@ -276,6 +284,8 @@ class KeibaOvalRace {
       g.fillText(label, x - tw / 2 + 1, y - h / 2 - labelH + 1);
     }
 
+    g.restore();
+
     this.drawMiniMap(g);
     if (this.phase !== 'intro') this.drawRanking(g);
   }
@@ -293,6 +303,9 @@ class KeibaOvalRace {
     }
     g.fillStyle = '#8a8a9e';
     g.fillRect(0, 150, VW, 8);
+    // ズームでコースが上下に振れても黒い隙間が出ないよう下地を敷いておく
+    g.fillStyle = '#2f7a33';
+    g.fillRect(0, 158, VW, VH - 158);
   }
 
   private drawCourse(g: CanvasRenderingContext2D, camX: number): void {
@@ -394,35 +407,25 @@ class KeibaOvalRace {
   }
 
   private drawMiniMap(g: CanvasRenderingContext2D): void {
-    const cx = VW * 0.5;
-    const cy = 28;
-    const rx = VW * 0.28;
-    const ry = 16;
-    const startAngle = -Math.PI / 2;
-    const sweep = Math.PI * 2 * 0.92; // 開始と終了の間に隙間を残す
-
+    const mx = VW * 0.2;
+    const mw = VW * 0.6;
+    const my = 28;
     g.fillStyle = 'rgba(0,0,0,0.45)';
-    g.fillRect(cx - rx - 14, cy - ry - 10, rx * 2 + 28, ry * 2 + 20);
-
+    g.fillRect(mx - 10, my - 12, mw + 20, 26);
     g.strokeStyle = '#fff';
     g.lineWidth = 2;
     g.beginPath();
-    g.ellipse(cx, cy, rx, ry, 0, startAngle, startAngle + sweep);
+    g.moveTo(mx, my);
+    g.lineTo(mx + mw, my);
     g.stroke();
-
-    // ゴール地点
-    const goalAngle = startAngle + sweep;
     g.fillStyle = '#ffb300';
-    g.beginPath();
-    g.arc(cx + rx * Math.cos(goalAngle), cy + ry * Math.sin(goalAngle), 5, 0, Math.PI * 2);
-    g.fill();
-
+    g.fillRect(mx + mw - 2, my - 8, 4, 16);
     const dotR = this.c.names.length > 30 ? 3 : 5;
     this.c.names.forEach((_, i) => {
-      const a = startAngle + this.progress(i) * sweep;
       g.fillStyle = SILKS_COLORS[i % SILKS_COLORS.length];
+      const px = mx + this.progress(i) * mw;
       g.beginPath();
-      g.arc(cx + rx * Math.cos(a), cy + ry * Math.sin(a), dotR, 0, Math.PI * 2);
+      g.arc(px, my, dotR, 0, Math.PI * 2);
       g.fill();
     });
   }
