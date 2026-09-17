@@ -111,12 +111,24 @@ export const marathonTheme: ThemeModule = {
   maxLanes: 100,
   available: true,
   flavor: {
-    start: '号砲! スタート!!',
-    lead: (name) => `${name} が飛び出した!`,
-    hold: (name) => `${name} ハイペースで引っ張る!`,
-    pass: (name) => `${name} がスパートをかけた!`,
-    corner: '競技場が見えてきた! ラスト1km!',
-    closing: 'ゴールテープ目前、デッドヒート!!',
+    start: ['号砲! スタート!!', 'スタートラインを切った!'],
+    lead: [
+      (name) => `${name} が飛び出した!`,
+      (name) => `${name} が先頭集団を作る!`,
+      (name) => `先頭は ${name}!`,
+    ],
+    hold: [
+      (name) => `${name} ハイペースで引っ張る!`,
+      (name) => `${name} 、独走のペースだ!`,
+      (name) => `${name} 、腕の振りが力強い!`,
+    ],
+    pass: [
+      (name) => `${name} がスパートをかけた!`,
+      (name) => `${name} が一気に前へ!`,
+      (name) => `${name} がロングスパート!`,
+    ],
+    corner: ['競技場が見えてきた! ラスト1km!', '沿道の声援が大きくなってきた!'],
+    closing: ['ゴールテープ目前、デッドヒート!!', '最後の一歩まで分からない!!'],
   },
   run: (ctx: RaceContext): RaceController => makeController(new MarathonRace(ctx)),
 };

@@ -92,12 +92,24 @@ export const carTheme: ThemeModule = {
   maxLanes: 100,
   available: true,
   flavor: {
-    start: 'シグナル グリーン! スタート!!',
-    lead: (name) => `${name} がトップに浮上!`,
-    hold: (name) => `${name} 独走態勢か!?`,
-    pass: (name) => `${name} がオーバーテイク!`,
-    corner: 'ファイナルラップ!',
-    closing: 'チェッカーフラッグ目前、大接戦!!',
+    start: ['シグナル グリーン! スタート!!', 'スタートダッシュ決まった!'],
+    lead: [
+      (name) => `${name} がトップに浮上!`,
+      (name) => `${name} がホールショットを奪う!`,
+      (name) => `トップは ${name}!`,
+    ],
+    hold: [
+      (name) => `${name} 独走態勢か!?`,
+      (name) => `${name} がリードを広げる!`,
+      (name) => `${name} 、後続を寄せ付けない!`,
+    ],
+    pass: [
+      (name) => `${name} がオーバーテイク!`,
+      (name) => `${name} がスリップストリームから抜け出す!`,
+      (name) => `イン側から ${name} が差した!`,
+    ],
+    corner: ['ファイナルラップ!', '最終セクターに突入!'],
+    closing: ['チェッカーフラッグ目前、大接戦!!', 'ゴールライン目前で並んだ!!'],
   },
   run: (ctx: RaceContext): RaceController => makeController(new CarRace(ctx)),
 };

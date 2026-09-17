@@ -102,12 +102,24 @@ export const duckTheme: ThemeModule = {
   maxLanes: 100,
   available: true,
   flavor: {
-    start: 'ガーガー、スタート!!',
-    lead: (name) => `${name} 号がすいすい先頭!`,
-    hold: (name) => `${name} 号、余裕の表情だ!`,
-    pass: (name) => `${name} 号が波に乗ってかわした!`,
-    corner: 'ゴールの桟橋が見えてきた!',
-    closing: '最後の水しぶき勝負だーー!!',
+    start: ['ガーガー、スタート!!', '一斉に水面へダイブ!'],
+    lead: [
+      (name) => `${name} 号がすいすい先頭!`,
+      (name) => `${name} 号が飛び出した!`,
+      (name) => `先頭は ${name} 号!`,
+    ],
+    hold: [
+      (name) => `${name} 号、余裕の表情だ!`,
+      (name) => `${name} 号、いいペースだ!`,
+      (name) => `${name} 号、後ろを振り返る余裕!`,
+    ],
+    pass: [
+      (name) => `${name} 号が波に乗ってかわした!`,
+      (name) => `${name} 号がすいっと追い抜いた!`,
+      (name) => `${name} 号が水しぶきを上げて先頭に!`,
+    ],
+    corner: ['ゴールの桟橋が見えてきた!', '桟橋が近づいてきた!'],
+    closing: ['最後の水しぶき勝負だーー!!', 'ここからは羽ばたき勝負だ!!'],
   },
   run: (ctx: RaceContext): RaceController => makeController(new DuckRace(ctx)),
 };

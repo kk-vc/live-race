@@ -23,24 +23,41 @@ export interface RaceScript {
   events: RaceEvent[];
 }
 
-/** テーマごとの実況の語彙 */
+/** テーマごとの実況の語彙。各項目は複数の言い回しからランダムに選ばれる */
 export interface EventFlavor {
-  start: string;
-  lead(name: string): string;
-  hold(name: string): string;
-  pass(name: string): string;
-  corner: string;
-  closing: string;
+  start: string[];
+  lead: Array<(name: string) => string>;
+  hold: Array<(name: string) => string>;
+  pass: Array<(name: string) => string>;
+  corner: string[];
+  closing: string[];
 }
 
 const DEFAULT_FLAVOR: EventFlavor = {
-  start: 'スタート!!',
-  lead: (name) => `${name} が先頭に立った!`,
-  hold: (name) => `${name} 逃げる逃げる!`,
-  pass: (name) => `${name} がかわして先頭!`,
-  corner: '最終コーナーを回った!',
-  closing: 'ゴール前、大接戦だーーっ!!',
+  start: ['スタート!!', 'ゲートが開いた!'],
+  lead: [
+    (name) => `${name} が先頭に立った!`,
+    (name) => `飛び出したのは ${name}!`,
+    (name) => `${name} が好スタートを切った!`,
+  ],
+  hold: [
+    (name) => `${name} 逃げる逃げる!`,
+    (name) => `${name} 、後続を離しにかかる!`,
+    (name) => `${name} のペースが落ちない!`,
+  ],
+  pass: [
+    (name) => `${name} がかわして先頭!`,
+    (name) => `${name} が一気に抜け出した!`,
+    (name) => `ここで ${name} が交わした!`,
+  ],
+  corner: ['最終コーナーを回った!', '最後のコーナーだ!'],
+  closing: ['ゴール前、大接戦だーーっ!!', 'ここから壮絶な叩き合いだ!!'],
 };
+
+/** 配列からランダムに1つ選ぶ */
+function pick<T>(items: T[]): T {
+  return items[Math.floor(rand() * items.length)];
+}
 
 /**
  * レース台本を生成する。
@@ -106,22 +123,22 @@ export function generateRaceScript(
   };
 
   // 実況テロップ: 実際の描画位置と一致するよう、台本から先頭を細かくサンプリングして生成
-  const events: RaceEvent[] = [{ time: 0, text: flavor.start, sfx: 'start' }];
+  const events: RaceEvent[] = [{ time: 0, text: pick(flavor.start), sfx: 'start' }];
   const midFractions = [0.14, 0.26, 0.38, 0.5, 0.62, 0.74, 0.86];
   let prevLeader = -1;
   for (const f of midFractions) {
     const leader = leaderAt(duration * f);
     const text =
       prevLeader === -1
-        ? flavor.lead(names[leader])
+        ? pick(flavor.lead)(names[leader])
         : leader === prevLeader
-          ? flavor.hold(names[leader])
-          : flavor.pass(names[leader]);
+          ? pick(flavor.hold)(names[leader])
+          : pick(flavor.pass)(names[leader]);
     events.push({ time: duration * f, text });
     prevLeader = leader;
   }
-  events.push({ time: duration * cornerAt, text: flavor.corner, sfx: 'bell' });
-  events.push({ time: duration * 0.92, text: flavor.closing, sfx: 'crowd' });
+  events.push({ time: duration * cornerAt, text: pick(flavor.corner), sfx: 'bell' });
+  events.push({ time: duration * 0.92, text: pick(flavor.closing), sfx: 'crowd' });
 
   return { winnerIndex, duration, photoFinish, racers, events };
 }
