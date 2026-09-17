@@ -105,17 +105,23 @@ export function generateRaceScript(
     return best;
   };
 
-  // 実況テロップ: 実際の描画位置と一致するよう、台本から先頭をサンプリングして生成
+  // 実況テロップ: 実際の描画位置と一致するよう、台本から先頭を細かくサンプリングして生成
   const events: RaceEvent[] = [{ time: 0, text: flavor.start, sfx: 'start' }];
-  const mid1 = leaderAt(duration * 0.3);
-  events.push({ time: duration * 0.3, text: flavor.lead(names[mid1]) });
-  const mid2 = leaderAt(duration * 0.55);
-  events.push({
-    time: duration * 0.55,
-    text: mid2 === mid1 ? flavor.hold(names[mid2]) : flavor.pass(names[mid2]),
-  });
+  const midFractions = [0.14, 0.26, 0.38, 0.5, 0.62, 0.74, 0.86];
+  let prevLeader = -1;
+  for (const f of midFractions) {
+    const leader = leaderAt(duration * f);
+    const text =
+      prevLeader === -1
+        ? flavor.lead(names[leader])
+        : leader === prevLeader
+          ? flavor.hold(names[leader])
+          : flavor.pass(names[leader]);
+    events.push({ time: duration * f, text });
+    prevLeader = leader;
+  }
   events.push({ time: duration * cornerAt, text: flavor.corner, sfx: 'bell' });
-  events.push({ time: duration * 0.88, text: flavor.closing, sfx: 'crowd' });
+  events.push({ time: duration * 0.92, text: flavor.closing, sfx: 'crowd' });
 
   return { winnerIndex, duration, photoFinish, racers, events };
 }
