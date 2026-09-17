@@ -116,8 +116,10 @@ function startRace(names: string[]): void {
       if (text === null) {
         telopEl.classList.add('hidden');
       } else {
-        telopEl.textContent = text;
-        telopEl.classList.remove('hidden');
+        if (telopToggle.checked) {
+          telopEl.textContent = text;
+          telopEl.classList.remove('hidden');
+        }
         narrator.speak(text);
       }
     },
@@ -261,6 +263,12 @@ narrationToggle.addEventListener('change', () => {
   saveState({ narration: narrationToggle.checked });
 });
 
+const telopToggle = $<HTMLInputElement>('#telop-toggle');
+telopToggle.addEventListener('change', () => {
+  saveState({ telop: telopToggle.checked });
+  if (!telopToggle.checked) telopEl.classList.add('hidden');
+});
+
 $('#btn-fullscreen').addEventListener('click', () => {
   if (document.fullscreenElement) {
     void document.exitFullscreen();
@@ -286,6 +294,7 @@ btnMute.textContent = muted ? '🔇' : '🔊';
 narrationToggle.checked = saved.narration && narrator.supported;
 narrator.setEnabled(narrationToggle.checked);
 if (!narrator.supported) narrationToggle.disabled = true;
+telopToggle.checked = saved.telop;
 const durRadio = document.querySelector<HTMLInputElement>(`input[name="duration"][value="${saved.duration}"]`);
 if (durRadio) durRadio.checked = true;
 

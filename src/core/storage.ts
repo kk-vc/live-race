@@ -7,6 +7,7 @@ export interface SavedState {
   volume: number;
   muted: boolean;
   narration: boolean;
+  telop: boolean;
 }
 
 const DEFAULTS: SavedState = {
@@ -16,6 +17,7 @@ const DEFAULTS: SavedState = {
   volume: 70,
   muted: false,
   narration: false,
+  telop: true,
 };
 
 export function loadState(): SavedState {
