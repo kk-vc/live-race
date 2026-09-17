@@ -67,10 +67,17 @@ class KeibaOvalRace {
   private telopTimer: number | null = null;
   private resolveFinished!: () => void;
   finished: Promise<void>;
+  /** 馬ごとのコース内外への揺れ(内側に切れ込む・外に膨らむ)のパラメータ */
+  private sway: Array<{ amp: number; omega: number; phase: number }>;
 
   constructor(private c: RaceContext) {
     this.ctx2d = c.canvas.getContext('2d')!;
     this.sprites = c.names.map((_, i) => this.buildSprites(i));
+    this.sway = c.names.map(() => ({
+      amp: 0.5 + Math.random() * 1.1,
+      omega: 0.45 + Math.random() * 0.75,
+      phase: Math.random() * Math.PI * 2,
+    }));
     this.finished = new Promise((res) => (this.resolveFinished = res));
   }
 
@@ -249,7 +256,10 @@ class KeibaOvalRace {
 
     for (const i of order) {
       const p = trackPointAt(this.progress(i) * TRACK_LEN);
-      const offset = -BAND_HALF + laneStep * i + laneStep / 2;
+      const baseOffset = -BAND_HALF + laneStep * i + laneStep / 2;
+      const sw = this.sway[i];
+      const sway = Math.sin(this.raceClock * sw.omega + sw.phase) * sw.amp * laneStep;
+      const offset = Math.max(-BAND_HALF + 2, Math.min(BAND_HALF - 2, baseOffset + sway));
       const x = p.x + p.nx * offset;
       const y = p.y + p.ny * offset;
 
