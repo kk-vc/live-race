@@ -221,14 +221,12 @@ class KeibaOvalRace {
   private drawWorld(g: CanvasRenderingContext2D): void {
     const n = this.c.names.length;
 
-    // 先頭の位置からカメラXを決定(進行方向に応じて見せ幅を前方寄りにする)
+    // 先頭の位置を常に画面中心付近に据えるカメラ(進行方向に応じて見せ幅を前方寄りにする)
     let leaderS = 0;
     for (let i = 0; i < n; i++) leaderS = Math.max(leaderS, this.progress(i) * TRACK_LEN);
     const lp = trackPointAt(leaderS);
     const forwardBias = Math.cos(lp.heading) * VW * 0.12;
-    const minCam = -170;
-    const maxCam = STRAIGHT_LEN + TURN_R + 170 - VW;
-    const camX = Math.min(Math.max(lp.x - VW * 0.5 + forwardBias, minCam), maxCam);
+    const camX = lp.x - VW * 0.5 + forwardBias;
 
     this.drawScenery(g, camX);
     this.drawCourse(g, camX);
@@ -396,25 +394,35 @@ class KeibaOvalRace {
   }
 
   private drawMiniMap(g: CanvasRenderingContext2D): void {
-    const mx = VW * 0.2;
-    const mw = VW * 0.6;
-    const my = 28;
+    const cx = VW * 0.5;
+    const cy = 28;
+    const rx = VW * 0.28;
+    const ry = 16;
+    const startAngle = -Math.PI / 2;
+    const sweep = Math.PI * 2 * 0.92; // 開始と終了の間に隙間を残す
+
     g.fillStyle = 'rgba(0,0,0,0.45)';
-    g.fillRect(mx - 10, my - 12, mw + 20, 26);
+    g.fillRect(cx - rx - 14, cy - ry - 10, rx * 2 + 28, ry * 2 + 20);
+
     g.strokeStyle = '#fff';
     g.lineWidth = 2;
     g.beginPath();
-    g.moveTo(mx, my);
-    g.lineTo(mx + mw, my);
+    g.ellipse(cx, cy, rx, ry, 0, startAngle, startAngle + sweep);
     g.stroke();
+
+    // ゴール地点
+    const goalAngle = startAngle + sweep;
     g.fillStyle = '#ffb300';
-    g.fillRect(mx + mw - 2, my - 8, 4, 16);
+    g.beginPath();
+    g.arc(cx + rx * Math.cos(goalAngle), cy + ry * Math.sin(goalAngle), 5, 0, Math.PI * 2);
+    g.fill();
+
     const dotR = this.c.names.length > 30 ? 3 : 5;
     this.c.names.forEach((_, i) => {
+      const a = startAngle + this.progress(i) * sweep;
       g.fillStyle = SILKS_COLORS[i % SILKS_COLORS.length];
-      const px = mx + this.progress(i) * mw;
       g.beginPath();
-      g.arc(px, my, dotR, 0, Math.PI * 2);
+      g.arc(cx + rx * Math.cos(a), cy + ry * Math.sin(a), dotR, 0, Math.PI * 2);
       g.fill();
     });
   }
