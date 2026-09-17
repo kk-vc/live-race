@@ -450,18 +450,6 @@ class KeibaOvalRace {
     for (let yy = y - half - 6; yy < y + half + 14; yy += 16) {
       g.fillRect(x - 4, yy, 8, 8);
     }
-    g.fillStyle = '#222';
-    for (let r = 0; r < 4; r++) {
-      for (let c = 0; c < 6; c++) {
-        if ((r + c) % 2 === 0) g.fillRect(x - 46 + c * 12, y - half - 90 + r * 12, 12, 12);
-      }
-    }
-    g.fillStyle = '#fff';
-    g.font = 'bold 20px sans-serif';
-    g.textAlign = 'center';
-    g.textBaseline = 'alphabetic';
-    g.fillText('GOAL', x, y - half - 96);
-    g.textAlign = 'start';
   }
 
   private drawMiniMap(g: CanvasRenderingContext2D): void {
