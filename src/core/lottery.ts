@@ -21,3 +21,13 @@ export function rand(): number {
 export function pickWinner(count: number): number {
   return secureRandomInt(count);
 }
+
+/** 配列をシャッフルした新しい配列を返す(Fisher-Yates、暗号論的乱数使用) */
+export function shuffle<T>(items: readonly T[]): T[] {
+  const arr = items.slice();
+  for (let i = arr.length - 1; i > 0; i--) {
+    const j = secureRandomInt(i + 1);
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+  return arr;
+}

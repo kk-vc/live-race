@@ -1,5 +1,5 @@
 import { parseRoster } from './core/roster';
-import { pickWinner } from './core/lottery';
+import { pickWinner, shuffle } from './core/lottery';
 import { generateRaceScript } from './core/raceScript';
 import { loadState, saveState } from './core/storage';
 import { AudioEngine } from './core/audio';
@@ -90,6 +90,9 @@ function getDuration(): number {
 
 function startRace(names: string[]): void {
   audio.unlock();
+  // 入力順(先頭に書いた人が有利/不利に見える等)への疑念が出ないよう、
+  // 当選者を決める前に並び順をシャッフルしてからレーン割り当てに使う
+  names = shuffle(names);
   currentNames = names;
   currentWinner = pickWinner(names.length);
   const script = generateRaceScript(
