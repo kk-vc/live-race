@@ -5,7 +5,8 @@ import { HORSE_FRAME_A, HORSE_FRAME_B } from './sprites';
 
 const BODY_COLORS = ['#8a5a2b', '#6b4423', '#a9743c', '#4a3320', '#96672e', '#7d5634'];
 
-// ---- コース形状: バックストレッチ→最終コーナー→ホームストレッチのU字コース(斜め俯瞰) ----
+// ---- コース形状: 向正面コーナー→バックストレッチ→最終コーナー→ホームストレッチの
+// 閉じたオーバルを1周してゴール(斜め俯瞰)。スタートとゴールは同じ地点(ホームストレッチ端) ----
 const STRAIGHT_LEN = 2400;
 const BACK_Y = 260; // バックストレッチ(奥側)のワールドY
 const HOME_Y = 620; // ホームストレッチ(手前側)のワールドY
@@ -13,7 +14,7 @@ const TURN_CX = STRAIGHT_LEN;
 const TURN_CY = (BACK_Y + HOME_Y) / 2;
 const TURN_R = (HOME_Y - BACK_Y) / 2;
 const TURN_ARC_LEN = Math.PI * TURN_R;
-const TRACK_LEN = STRAIGHT_LEN * 2 + TURN_ARC_LEN;
+const TRACK_LEN = STRAIGHT_LEN * 2 + TURN_ARC_LEN * 2;
 const BAND_HALF = 78; // レーン帯の半幅
 
 interface TrackPos {
@@ -26,14 +27,31 @@ interface TrackPos {
   ny: number;
 }
 
-/** コース上の距離sから位置・向き・法線を求める */
+/** コース上の距離sから位置・向き・法線を求める(1周してホームストレッチ端でゴール) */
 function trackPointAt(s: number): TrackPos {
   const cs = Math.min(TRACK_LEN, Math.max(0, s));
-  if (cs <= STRAIGHT_LEN) {
-    return { x: cs, y: BACK_Y, heading: 0, nx: 0, ny: 1 };
+
+  // 向正面コーナー(スタート直後。ホームストレッチ端→バックストレッチ端へ抜ける)
+  if (cs <= TURN_ARC_LEN) {
+    const t = cs / TURN_R; // 0..π
+    const angle = Math.PI / 2 + t;
+    return {
+      x: TURN_R * Math.cos(angle),
+      y: TURN_CY + TURN_R * Math.sin(angle),
+      heading: Math.PI - t,
+      nx: -Math.cos(angle),
+      ny: -Math.sin(angle),
+    };
   }
-  if (cs <= STRAIGHT_LEN + TURN_ARC_LEN) {
-    const t = (cs - STRAIGHT_LEN) / TURN_R; // 0..π
+
+  // バックストレッチ
+  if (cs <= TURN_ARC_LEN + STRAIGHT_LEN) {
+    return { x: cs - TURN_ARC_LEN, y: BACK_Y, heading: 0, nx: 0, ny: 1 };
+  }
+
+  // 最終コーナー
+  if (cs <= TURN_ARC_LEN * 2 + STRAIGHT_LEN) {
+    const t = (cs - TURN_ARC_LEN - STRAIGHT_LEN) / TURN_R; // 0..π
     const angle = -Math.PI / 2 + t;
     return {
       x: TURN_CX + TURN_R * Math.cos(angle),
@@ -43,7 +61,9 @@ function trackPointAt(s: number): TrackPos {
       ny: -Math.sin(angle),
     };
   }
-  const u = cs - STRAIGHT_LEN - TURN_ARC_LEN;
+
+  // ホームストレッチ(ゴールへ)
+  const u = cs - TURN_ARC_LEN * 2 - STRAIGHT_LEN;
   return { x: STRAIGHT_LEN - u, y: HOME_Y, heading: Math.PI, nx: 0, ny: -1 };
 }
 
@@ -392,16 +412,8 @@ class KeibaOvalRace {
     });
     g.restore();
 
-    this.drawGate(g, 0 - camX, BACK_Y, outerHalf);
+    // スタートとゴールは1周して同じ地点(ホームストレッチ端)
     this.drawGoal(g, 0 - camX, HOME_Y, outerHalf);
-  }
-
-  private drawGate(g: CanvasRenderingContext2D, x: number, y: number, half: number): void {
-    if (x < -80 || x > VW + 80) return;
-    g.fillStyle = '#cccccc';
-    g.fillRect(x - 4, y - half - 14, 8, half * 2 + 28);
-    g.fillStyle = '#888';
-    g.fillRect(x - 10, y - half - 26, 20, 14);
   }
 
   private drawGoal(g: CanvasRenderingContext2D, x: number, y: number, half: number): void {
@@ -486,8 +498,8 @@ export const keibaTheme: ThemeModule = {
   icon: '🏇',
   maxLanes: 100,
   available: true,
-  // 実際の最終コーナーの位置(コース中央付近)でテロップが出るように合わせる
-  cornerAt: (STRAIGHT_LEN + TURN_ARC_LEN / 2) / TRACK_LEN,
+  // 実際の最終コーナー(向正面コーナーの次、ホームストレッチ手前)でテロップが出るように合わせる
+  cornerAt: (TURN_ARC_LEN + STRAIGHT_LEN + TURN_ARC_LEN / 2) / TRACK_LEN,
   run(ctx: RaceContext): RaceController {
     const race = new KeibaOvalRace(ctx);
     race.start();
