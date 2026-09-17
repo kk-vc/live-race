@@ -304,12 +304,13 @@ class KeibaOvalRace {
     const innerR = TURN_R - outerHalf;
     const outerR = TURN_R + outerHalf;
 
-    // 内馬場(コース内側の芝生)
+    // 内馬場(コース内側の芝生)。両コーナーを繋いだ閉じたオーバル形状にする
     g.beginPath();
     g.moveTo(0 - camX, BACK_Y + outerHalf);
     g.lineTo(TURN_CX - camX, BACK_Y + outerHalf);
     g.arc(TURN_CX - camX, TURN_CY, innerR, -Math.PI / 2, Math.PI / 2);
     g.lineTo(0 - camX, HOME_Y - outerHalf);
+    g.arc(0 - camX, TURN_CY, innerR, Math.PI / 2, (Math.PI * 3) / 2);
     g.closePath();
     g.fillStyle = '#2f7a33';
     g.fill();
@@ -319,14 +320,18 @@ class KeibaOvalRace {
     g.fillRect(0 - camX, BACK_Y - outerHalf, STRAIGHT_LEN, outerHalf * 2);
     g.fillRect(0 - camX, HOME_Y - outerHalf, STRAIGHT_LEN, outerHalf * 2);
 
-    // 最終コーナー(太い円弧)
+    // 最終コーナー・向正面コーナー(太い円弧)
     g.save();
     g.translate(-camX, 0);
-    g.beginPath();
-    g.arc(TURN_CX, TURN_CY, TURN_R, -Math.PI / 2, Math.PI / 2);
-    g.lineWidth = outerHalf * 2;
-    g.strokeStyle = surface;
-    g.stroke();
+    [TURN_CX, 0].forEach((cx, idx) => {
+      g.beginPath();
+      const start = idx === 0 ? -Math.PI / 2 : Math.PI / 2;
+      const end = idx === 0 ? Math.PI / 2 : (Math.PI * 3) / 2;
+      g.arc(cx, TURN_CY, TURN_R, start, end);
+      g.lineWidth = outerHalf * 2;
+      g.strokeStyle = surface;
+      g.stroke();
+    });
     g.restore();
 
     // 柵(内側・外側)
@@ -347,6 +352,9 @@ class KeibaOvalRace {
     [innerR, outerR].forEach((r) => {
       g.beginPath();
       g.arc(TURN_CX, TURN_CY, r, -Math.PI / 2, Math.PI / 2);
+      g.stroke();
+      g.beginPath();
+      g.arc(0, TURN_CY, r, Math.PI / 2, (Math.PI * 3) / 2);
       g.stroke();
     });
     g.restore();
