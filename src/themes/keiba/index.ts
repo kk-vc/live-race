@@ -18,7 +18,7 @@ const TURN_ARC_LEN = Math.PI * TURN_R;
 const FINISH_LEN = STRAIGHT_LEN * 0.75; // 最後の直線の3/4地点でゴールする
 const GOAL_X = STRAIGHT_LEN - FINISH_LEN; // ゴールのワールドX
 const LOOP_LEN = STRAIGHT_LEN + TURN_ARC_LEN * 2 + FINISH_LEN; // 向正面コーナー〜ゴールまで1周分
-const LEAD_IN = STRAIGHT_LEN; // スタート直後の直線(ホームストレッチを1本通過してから1周する)
+const LEAD_IN = STRAIGHT_LEN * 0.75; // スタートは直線の1/4地点。残り3/4を走ってから向正面コーナーへ
 const TRACK_LEN = LEAD_IN + LOOP_LEN;
 const BAND_HALF = 78; // レーン帯の半幅
 
@@ -74,9 +74,9 @@ function loopPointAt(cs: number): TrackPos {
 function trackPointAt(s: number): TrackPos {
   const cs = Math.min(TRACK_LEN, Math.max(0, s));
 
-  // スタート直後の直線(ホームストレッチを向正面コーナーへ向けて1本通過)
+  // スタート直後の直線(ホームストレッチを向正面コーナーへ向けて通過)
   if (cs <= LEAD_IN) {
-    return { x: STRAIGHT_LEN - cs, y: HOME_Y, heading: Math.PI, nx: 0, ny: -1 };
+    return { x: LEAD_IN - cs, y: HOME_Y, heading: Math.PI, nx: 0, ny: -1 };
   }
 
   return loopPointAt(cs - LEAD_IN);
@@ -428,7 +428,7 @@ class KeibaOvalRace {
     g.restore();
 
     // スタート(ホームストレッチのもう一方の端)とゴール(最後の直線の真ん中)
-    this.drawGate(g, STRAIGHT_LEN - camX, HOME_Y, outerHalf);
+    this.drawGate(g, LEAD_IN - camX, HOME_Y, outerHalf);
     this.drawGoal(g, GOAL_X - camX, HOME_Y, outerHalf);
   }
 
