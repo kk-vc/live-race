@@ -15,7 +15,9 @@ const TURN_CX = STRAIGHT_LEN;
 const TURN_CY = (BACK_Y + HOME_Y) / 2;
 const TURN_R = (HOME_Y - BACK_Y) / 2;
 const TURN_ARC_LEN = Math.PI * TURN_R;
-const LOOP_LEN = STRAIGHT_LEN * 2 + TURN_ARC_LEN * 2; // 向正面コーナー〜ホームストレッチ1周分
+const FINISH_LEN = STRAIGHT_LEN / 2; // 最後の直線の真ん中でゴールする
+const GOAL_X = STRAIGHT_LEN - FINISH_LEN; // ゴールのワールドX(ホームストレッチ中央)
+const LOOP_LEN = STRAIGHT_LEN + TURN_ARC_LEN * 2 + FINISH_LEN; // 向正面コーナー〜ゴールまで1周分
 const LEAD_IN = STRAIGHT_LEN; // スタート直後の直線(ホームストレッチを1本通過してから1周する)
 const TRACK_LEN = LEAD_IN + LOOP_LEN;
 const BAND_HALF = 78; // レーン帯の半幅
@@ -425,9 +427,9 @@ class KeibaOvalRace {
     });
     g.restore();
 
-    // スタート(ホームストレッチのもう一方の端)とゴール
+    // スタート(ホームストレッチのもう一方の端)とゴール(最後の直線の真ん中)
     this.drawGate(g, STRAIGHT_LEN - camX, HOME_Y, outerHalf);
-    this.drawGoal(g, 0 - camX, HOME_Y, outerHalf);
+    this.drawGoal(g, GOAL_X - camX, HOME_Y, outerHalf);
   }
 
   private drawGate(g: CanvasRenderingContext2D, x: number, y: number, half: number): void {
