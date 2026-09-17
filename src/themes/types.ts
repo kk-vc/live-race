@@ -28,5 +28,7 @@ export interface ThemeModule {
   available: boolean;
   /** 実況テロップの語彙(省略時は競馬風) */
   flavor?: EventFlavor;
+  /** 「最終コーナーを回った」テロップを出す進行度(0..1、省略時は0.75) */
+  cornerAt?: number;
   run(ctx: RaceContext): RaceController;
 }

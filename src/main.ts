@@ -92,7 +92,13 @@ function startRace(names: string[]): void {
   audio.unlock();
   currentNames = names;
   currentWinner = pickWinner(names.length);
-  const script = generateRaceScript(names, currentWinner, getDuration(), selectedTheme().flavor);
+  const script = generateRaceScript(
+    names,
+    currentWinner,
+    getDuration(),
+    selectedTheme().flavor,
+    selectedTheme().cornerAt,
+  );
 
   screens.setup.classList.remove('active');
   screens.race.classList.add('active');

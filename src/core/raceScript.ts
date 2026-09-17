@@ -52,6 +52,7 @@ export function generateRaceScript(
   winnerIndex: number,
   duration: number,
   flavor: EventFlavor = DEFAULT_FLAVOR,
+  cornerAt: number = 0.75,
 ): RaceScript {
   const n = names.length;
 
@@ -113,7 +114,7 @@ export function generateRaceScript(
     time: duration * 0.55,
     text: mid2 === mid1 ? flavor.hold(names[mid2]) : flavor.pass(names[mid2]),
   });
-  events.push({ time: duration * 0.75, text: flavor.corner, sfx: 'bell' });
+  events.push({ time: duration * cornerAt, text: flavor.corner, sfx: 'bell' });
   events.push({ time: duration * 0.88, text: flavor.closing, sfx: 'crowd' });
 
   return { winnerIndex, duration, photoFinish, racers, events };

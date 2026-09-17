@@ -254,6 +254,12 @@ class KeibaOvalRace {
     const outerEdge = -BAND_HALF * 0.1;
     const packStep = (innerEdge - outerEdge) / n;
 
+    // スタート直後は必ず横一列(ゲート幅いっぱいに等間隔)に並べ、
+    // そこからインコース寄り+横揺れへ数秒かけて自然に移行する
+    const gateOffset = (i: number) => -BAND_HALF + laneStep * i + laneStep / 2;
+    const RAMP_SEC = 2.5;
+    const rampT = Math.max(0, Math.min(1, this.raceClock / RAMP_SEC));
+
     // 奥(小さいY)から手前(大きいY)へ描画して奥行きを表現
     const order = this.c.names
       .map((_, i) => i)
@@ -264,7 +270,8 @@ class KeibaOvalRace {
       const baseOffset = outerEdge + packStep * i + packStep / 2;
       const sw = this.sway[i];
       const sway = Math.sin(this.raceClock * sw.omega + sw.phase) * sw.amp * packStep;
-      const offset = Math.max(-BAND_HALF + 2, Math.min(BAND_HALF - 2, baseOffset + sway));
+      const racingOffset = Math.max(-BAND_HALF + 2, Math.min(BAND_HALF - 2, baseOffset + sway));
+      const offset = gateOffset(i) + (racingOffset - gateOffset(i)) * rampT;
       const x = p.x + p.nx * offset;
       const y = p.y + p.ny * offset;
 
@@ -479,6 +486,8 @@ export const keibaTheme: ThemeModule = {
   icon: '🏇',
   maxLanes: 100,
   available: true,
+  // 実際の最終コーナーの位置(コース中央付近)でテロップが出るように合わせる
+  cornerAt: (STRAIGHT_LEN + TURN_ARC_LEN / 2) / TRACK_LEN,
   run(ctx: RaceContext): RaceController {
     const race = new KeibaOvalRace(ctx);
     race.start();
