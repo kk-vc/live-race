@@ -12,6 +12,8 @@ export class Narrator {
 
   constructor() {
     if (!this.supported) return;
+    // 前回セッションの発話がキューに残ったまま続くことがあるため、起動時に必ず止める
+    speechSynthesis.cancel();
     // 音声リストは非同期で届くことがある
     speechSynthesis.addEventListener?.('voiceschanged', () => this.pickVoice());
     this.pickVoice();
